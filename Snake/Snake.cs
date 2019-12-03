@@ -13,7 +13,8 @@ namespace Snake
         public const int DEFAULT_LENGHT = 4;
         public const ConsoleColor HEAD_COLOR = ConsoleColor.White;
         public const ConsoleColor DEFAULT_COLOR = ConsoleColor.Gray;
-        public const char SNAKE_BODY = '*';
+        public const ConsoleColor FILL_COLOR = ConsoleColor.Green;
+        public const char SNAKE_BODY = 'o';
         public int DELAY = 100;
         #endregion
         #region Public Properties
@@ -61,7 +62,6 @@ namespace Snake
             
             MovingThread = new Thread(Moving);
             ControlingThread = new Thread(Controling);
-            thread = new Thread(DisplayFill);
             Console.CursorVisible = false;
 
             void InitBody(int lenght)
@@ -92,7 +92,6 @@ namespace Snake
             Apple = apple;
             ControlingThread.Start();
             MovingThread.Start();
-            thread.Start();
         }
         public void Stop()
         {
@@ -115,7 +114,7 @@ namespace Snake
         public delegate void SendMessage(IAreaObject areaObject);
         private void OnAppleAchieved()
         {
-            if (DELAY >= 0)
+            if (DELAY > 0)
             {
                 DELAY -= 2;
             }
@@ -125,10 +124,6 @@ namespace Snake
         }
         #endregion
         #region Private Methods
-        private Thread thread;
-
-        
-
         private void Controling()
         {
             while (true)
@@ -166,8 +161,22 @@ namespace Snake
                     if (x == Apple.X && y == Apple.Y)
                     {
                         OnAppleAchieved();
+                        MoveNext(x, y);
+                        DisplayFill();
                     }
-                    MoveNext(x, y);
+                    else
+                    {
+                        MoveNext(x, y);
+                    }
+                    if (Tail.Any(body => body.X == x && body.Y == y))
+                    {
+                        CutOn(x, y);
+                        MoveNext(x, y);
+                    }
+                    else
+                    {
+                        MoveNext(x, y);
+                    }
                     Thread.Sleep(DELAY);
                 }
             }
@@ -236,7 +245,7 @@ namespace Snake
         }
         private void DisplayFill()
         {
-            Thread.Sleep(1000);
+            var delay = 25;
             IsMoving = false;
             var first = true;
             SnakeBody prev = new SnakeBody();
@@ -249,20 +258,45 @@ namespace Snake
                     Console.Write(SNAKE_BODY);
                 }
 
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = FILL_COLOR;
                 Console.SetCursorPosition(body.X, body.Y);
                 Console.Write(SNAKE_BODY);
 
                 first = false;
                 prev = body;
-                Thread.Sleep(50);
+                Thread.Sleep(delay);
             }
-            Thread.Sleep(50);
+            Thread.Sleep(delay);
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.SetCursorPosition(prev.X, prev.Y);
             Console.Write(SNAKE_BODY);
-            Thread.Sleep(100);
             IsMoving = true;
+        }
+        private void CutOn(int x, int y)
+        {
+            var body = Tail.Single(b => b.X == x && b.Y == y);
+            var i = 0;
+            var bodyes = new List<SnakeBody>();
+            var match = false;
+            var index = 0;
+            for (i = 0; i < Tail.Count(); i++)
+            {
+                if (Tail[i].X == x && Tail[i].Y == y)
+                {
+                    match = true;
+                    index = i;
+                }
+                if (match)
+                {
+                    bodyes.Add(Tail[i]);
+                }
+            }
+            foreach (var b in bodyes)
+            {
+                Console.SetCursorPosition(b.X, b.Y);
+                Console.Write(' ');
+            }
+            Tail.RemoveRange(i, Tail.Count() - i - 1);
         }
         #endregion        
     }
