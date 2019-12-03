@@ -27,11 +27,11 @@ namespace Snake
         private Map Map;
         private Apple Apple;
         private Snake Snake;
-        private void Refresh(IBlankSpace blankSpace)
+        private void Refresh(IAreaObject areaObject)
         {
             Map.AddPoints(1);
             Map.AddLenght(1);
-            Apple.Refresh(blankSpace);
+            Apple.Refresh(areaObject);
             Apple.Display();
         }
         #endregion

@@ -19,11 +19,11 @@ namespace Snake
         public int Y { get; private set; }
         #endregion
         #region Constructors
-        public Apple(IArea area, IBlankSpace blankSpace)
+        public Apple(IArea area, IAreaObject areaObject)
         {
             Area = area;
             Random = new Random();
-            Refresh(blankSpace);
+            Refresh(areaObject);
         }
         #endregion
         #region Public Methods
@@ -34,18 +34,18 @@ namespace Snake
             Console.Write(AppleSymbol);
             Console.ResetColor();
         }
-        public void Refresh(IBlankSpace blankSpace)
+        public void Refresh(IAreaObject areaObject)
         {
-            var xy = CreateApple(blankSpace);
+            var xy = Create(areaObject);
             X = xy.Item1;
             Y = xy.Item2;
         }
         #endregion
         #region Private Methods
-        private (int, int) CreateApple(IBlankSpace blankSpace)
+        private (int, int) Create(IAreaObject areaObject)
         {
             var xy = (Random.Next(Area.StartX, Area.EndX), Random.Next(Area.StartY, Area.EndY));
-            while (blankSpace.Coordinates.Any(body => body.Item1 == xy.Item1 && body.Item2 == xy.Item2))
+            while (areaObject.Objects.Any(body => body.Item1 == xy.Item1 && body.Item2 == xy.Item2))
             {
                 xy = (Random.Next(Area.StartX, Area.EndX), Random.Next(Area.StartY, Area.EndY));
             }

@@ -7,7 +7,7 @@ using Snake.Interfaces;
 
 namespace Snake
 {
-    public class Snake : ISnake, IBlankSpace
+    public class Snake : ISnake, IAreaObject
     {
         #region Constants
         public const int DEFAULT_LENGHT = 4;
@@ -17,7 +17,7 @@ namespace Snake
         public int DELAY = 100;
         #endregion
         #region Public Properties
-        public IEnumerable<(int, int)> Coordinates
+        public IEnumerable<(int, int)> Objects
         {
             get
             {
@@ -112,7 +112,7 @@ namespace Snake
         #endregion
         #region Events
         public event SendMessage AppleAchieved;
-        public delegate void SendMessage(IBlankSpace blankSpace);
+        public delegate void SendMessage(IAreaObject areaObject);
         private void OnAppleAchieved()
         {
             if (DELAY >= 0)
