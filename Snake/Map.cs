@@ -3,7 +3,7 @@ using Snake.Interfaces;
 
 namespace Snake
 {
-    public class Map : IMap
+    public class Map
     {
         #region Constants
         private const char HorizontalWall = '-';
@@ -14,12 +14,14 @@ namespace Snake
         private const string NicknameTitle = "NICKNAME:";
         private const int MaxScore = 100000;
         #endregion
+        #region Public Properties
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        #endregion
         #region Properties
         private readonly int MapX;
         private readonly int MapY;
-        public readonly int Width;
-        public readonly int Height;
-       
+
         private int Score = 0;
         private readonly int ScoreX;
         private readonly int ScoreY;
@@ -30,6 +32,10 @@ namespace Snake
         private readonly string Nickname;
         private readonly int NicknameX;
         private readonly int NicknameY;
+        #endregion
+        #region Area Propertirs
+        private readonly Lazy<IArea> area;
+        public IArea Area => area.Value;
         #endregion
         #region Constructors
         public Map(int x, int y, int width, int height, string nickname)
@@ -48,26 +54,27 @@ namespace Snake
             Nickname = nickname;
             NicknameX = MapX + Width - Nickname.Length - 2;
             NicknameY = MapY + 2;
+
+            area = new Lazy<IArea>(new Area(MapX + 1, MapY + 5, Width - 2, Height - 2));
         }
         #endregion
         #region Public Methods
-        public void Init()
+        public Map Build()
         {
             CreateWalls();
             CreateTitle();
-        }
-        public bool IsWall(int x, int y)
-        {
-            return (MapX == x || (MapX + Width - 1) == x) && (MapY == y || MapY + 4 == y || MapY + Height == y);
-        }
-        public bool InMap(int x, int y)
-        {
-            return (MapX < x && x < MapX + Width - 1) && (MapY + 4 < y && y < MapY + Width - 1);
+            return this;
         }
         public void AddPoints(int points)
         {
             Score += points;
             SetScore(Score);
+        }
+        public int Len = Snake.DEFAULT_LENGHT;
+        public void AddLenght(int lenght)
+        {
+            Len += lenght;
+            SetSnakeLenght(Len);
         }
         public void SetSnakeLenght(int lenght)
         {
@@ -111,7 +118,7 @@ namespace Snake
             // Set Lenght
             Console.SetCursorPosition(LenghtX - LenghtTitle.Length - 1, LenghtY);
             Console.Write(LenghtTitle);
-            SetSnakeLenght(0);
+            SetSnakeLenght(Snake.DEFAULT_LENGHT);
 
             // Set Nickname
             Console.SetCursorPosition(NicknameX - NicknameTitle.Length - 1, NicknameY);

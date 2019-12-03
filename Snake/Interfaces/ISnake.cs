@@ -6,7 +6,7 @@ namespace Snake.Interfaces
 {
     public interface ISnake
     {
-        void Start();
+        void Start(Apple apple);
         void Stop();
         void AddBody();
         void EatBody(int bodyIndex);
