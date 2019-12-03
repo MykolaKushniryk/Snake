@@ -57,7 +57,7 @@ namespace Snake
             Head = new SnakeBody { X = 16, Y = 6 };
             Tail = new List<SnakeBody>();
 
-            InitBody(10);
+            InitBody(lenght);
             
             MovingThread = new Thread(Moving);
             ControlingThread = new Thread(Controling);
@@ -115,8 +115,13 @@ namespace Snake
         public delegate void SendMessage(IBlankSpace blankSpace);
         private void OnAppleAchieved()
         {
-            DELAY -= 2;
+            if (DELAY >= 0)
+            {
+                DELAY -= 2;
+            }
             AppleAchieved?.Invoke(this);
+            var last = Tail[Tail.Count() - 1];
+            Tail.Add(new SnakeBody { X = last.X, Y = last.Y });
         }
         #endregion
         #region Private Methods
@@ -158,11 +163,11 @@ namespace Snake
                 {
                     var x = getX();
                     var y = getY();
-                    MoveNext(x, y);
                     if (x == Apple.X && y == Apple.Y)
                     {
                         OnAppleAchieved();
                     }
+                    MoveNext(x, y);
                     Thread.Sleep(DELAY);
                 }
             }
