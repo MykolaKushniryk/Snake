@@ -14,7 +14,7 @@ namespace Snake
         public const ConsoleColor HEAD_COLOR = ConsoleColor.White;
         public const ConsoleColor DEFAULT_COLOR = ConsoleColor.Gray;
         public const ConsoleColor FILL_COLOR = ConsoleColor.Green;
-        public const char SNAKE_BODY = 'o';
+        public const char SNAKE_BODY = '*';
         public int DELAY = 100;
         #endregion
         #region Public Properties
@@ -162,7 +162,7 @@ namespace Snake
                     {
                         OnAppleAchieved();
                         MoveNext(x, y);
-                        DisplayFill();
+                        //DisplayFill();
                     }
                     else
                     {
