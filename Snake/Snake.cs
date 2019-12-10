@@ -93,10 +93,10 @@ namespace Snake
             ControlingThread.Start();
             MovingThread.Start();
         }
+        private bool StopVal = false;
         public void Stop()
         {
-            MovingThread.Abort();
-            ControlingThread.Abort();
+            StopVal = true;
         }
         public void AddBody()
         {
@@ -126,7 +126,7 @@ namespace Snake
         #region Private Methods
         private void Controling()
         {
-            while (true)
+            while (!StopVal)
             {
                 var key = Console.ReadKey(true).Key;
                 if (IsMoving)
@@ -149,10 +149,11 @@ namespace Snake
                     }
                 }
             }
+            return;
         }
         private void Moving()
         {
-            while (true)
+            while (!StopVal)
             {
                 if (IsMoving)
                 {
@@ -180,6 +181,7 @@ namespace Snake
                     Thread.Sleep(DELAY);
                 }
             }
+            return;
             int getX()
             {
                 var x = Head.X + (Direction == 1 ? -1 : Direction == 3 ? 1 : 0);

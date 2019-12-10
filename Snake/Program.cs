@@ -1,4 +1,5 @@
 ﻿using System;
+using Snake.Windows;
 
 namespace Snake
 {
@@ -6,8 +7,7 @@ namespace Snake
     {
         static void Main(string[] args)
         {
-            //new Game().Play();
-            new Window(9, 9).Win();
+            new Game().PlayGame();
             Console.ReadKey();
         }
     }
