@@ -4,22 +4,18 @@ using Snake.Interfaces;
 
 namespace Snake
 {
-    public class Apple : IApple
+    public class Apple : Point
     {
         #region Constants
-        public const char AppleSymbol = '$';
-        public const ConsoleColor AppleColor = ConsoleColor.Green;
+        public const char SYMBOL = '$';
+        public const ConsoleColor COLOR = ConsoleColor.Green;
         #endregion
         #region Private Properties
         private readonly IArea Area;
         private readonly Random Random;
         #endregion
-        #region Properties
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        #endregion
         #region Constructors
-        public Apple(IArea area, IAreaObject areaObject)
+        public Apple(IArea area, IAreaObject areaObject) : base(0, 0, SYMBOL)
         {
             Area = area;
             Random = new Random();
@@ -29,9 +25,8 @@ namespace Snake
         #region Public Methods
         public void Display()
         {
-            Console.SetCursorPosition(X, Y);
-            Console.ForegroundColor = AppleColor;
-            Console.Write(AppleSymbol);
+            Console.ForegroundColor = COLOR;
+            base.Draw();
             Console.ResetColor();
         }
         public void Refresh(IAreaObject areaObject)

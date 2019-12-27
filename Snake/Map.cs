@@ -13,6 +13,7 @@ namespace Snake
         private const string LenghtTitle = "LENGHT:";
         private const string NicknameTitle = "NICKNAME:";
         private const int MaxScore = 100000;
+        private const ConsoleColor INFO_COLOR = ConsoleColor.Green;
         #endregion
         #region Public Properties
         public int Width { get; private set; }
@@ -47,7 +48,7 @@ namespace Snake
             Nickname = nickname;
             ScoreX = MapX + ScoreTitle.Length + 3;
             ScoreY = MapY + 2;
-            
+
             LenghtX = ScoreX + LenghtTitle.Length + MaxScore.ToString().Length + 2;
             LenghtY = ScoreY;
 
@@ -65,7 +66,7 @@ namespace Snake
             CreateTitle();
             return this;
         }
-        public void AddPoints(int points)
+        public void AddScore(int points)
         {
             Score += points;
             SetScore(Score);
@@ -79,6 +80,7 @@ namespace Snake
         public void SetSnakeLenght(int lenght)
         {
             Console.SetCursorPosition(LenghtX, LenghtY);
+            Console.ForegroundColor = INFO_COLOR;
             Console.Write(lenght + new string(' ', 3));
         }
         #endregion
@@ -117,18 +119,22 @@ namespace Snake
 
             // Set Lenght
             Console.SetCursorPosition(LenghtX - LenghtTitle.Length - 1, LenghtY);
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(LenghtTitle);
             SetSnakeLenght(Snake.DEFAULT_LENGHT);
 
             // Set Nickname
             Console.SetCursorPosition(NicknameX - NicknameTitle.Length - 1, NicknameY);
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(NicknameTitle);
             Console.SetCursorPosition(NicknameX, NicknameY);
+            Console.ForegroundColor = INFO_COLOR;
             Console.Write(Nickname);
         }
         private void SetScore(int score)
         {
             Console.SetCursorPosition(ScoreX, ScoreY);
+            Console.ForegroundColor = INFO_COLOR;
             Console.Write(score + new string(' ', MaxScore.ToString().Length - score.ToString().Length));
         }
         #endregion

@@ -6,8 +6,14 @@ namespace Snake
 {
     public class Game
     {
-        #region Properties
+        #region Game Properties
         private int Score = 0;
+        private int WinScore = 10;
+        #endregion
+        #region Game Objects
+        private Map Map;
+        private Apple Apple;
+        private Snake Snake;
         #endregion
         #region Constructors
         public Game()
@@ -25,27 +31,15 @@ namespace Snake
 
                 if (res)
                 {
-                    using (var window = new WinWindow(9, 9))
-                    {
-                        var result = window.Create().TryAgain();
-                        if (result)
-                        {
-                            continue;
-                        }
-                        break;
-                    }
+                    using var window = new WinWindow(9, 9);
+                    if (!window.Create().TryAgain()) break;
+                    Score = 0;
                 }
                 else
                 {
-                    using (var window = new LoseWindow(9, 9))
-                    {
-                        var result = window.Create().TryAgain();
-                        if (result)
-                        {
-                            continue;
-                        }
-                        break;
-                    }
+                    using var window = new LoseWindow(9, 9);
+                    if (!window.Create().TryAgain()) break;
+                    Score = 0;
                 }
             }
             Console.Clear();
@@ -55,6 +49,7 @@ namespace Snake
         public bool Play()
         {
             Map = new Map(0, 0, 80, 20, "mkushniryk").Build();
+            
             Snake = new Snake(Map.Area);
             Apple = new Apple(Map.Area, Snake);
             try
@@ -62,12 +57,11 @@ namespace Snake
                 Apple.Display();
                 Snake.AppleAchieved += Refresh;
                 Snake.Build().Start(Apple);
-                while (Score <= 5)
+                while (Score <= WinScore && !Snake.IsError)
                 {
 
                 }
-                
-                return true;
+                return !Snake.IsError;
             }
             catch (Exception)
             {
@@ -79,12 +73,10 @@ namespace Snake
                 Snake.Stop();
             }
         }
-        private Map Map;
-        private Apple Apple;
-        private Snake Snake;
+        
         private void Refresh(IAreaObject areaObject)
         {
-            Map.AddPoints(1);
+            Map.AddScore(1);
             Score++;
             Map.AddLenght(1);
             Apple.Refresh(areaObject);

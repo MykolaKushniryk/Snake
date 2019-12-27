@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
-using Snake.Events;
 using Snake.Interfaces;
 
 namespace Snake
 {
-    public class Snake : ISnake, IAreaObject
+    public class Snake : IAreaObject
     {
         #region Constants
         public const int DEFAULT_LENGHT = 4;
@@ -18,6 +17,7 @@ namespace Snake
         public int DELAY = 100;
         #endregion
         #region Public Properties
+        public bool UseArea { get; private set; } = true;
         public IEnumerable<(int, int)> Objects
         {
             get
@@ -37,14 +37,17 @@ namespace Snake
         #region Control Properties
         private readonly Thread MovingThread;
         private readonly Thread ControlingThread;
-        private volatile int Direction = 4;
+        private volatile Directions Direction = Directions.RIGHT;
         private volatile bool IsMoving = true;
+        private volatile bool IsStop = false;
+        public bool IsError = false;
         #endregion
         #region Snake Properties
         private readonly int StartX;
         private readonly int StartY;
-        private SnakeBody Head;
-        private readonly List<SnakeBody> Tail;
+        private Body Head;
+        private readonly List<Body> Tail;
+        private Apple Apple;
         #endregion
         #region Area Properties
         private readonly IArea Area;
@@ -54,14 +57,14 @@ namespace Snake
         public Snake(int lenght, IArea area)
         {
             Area = area;
-
-            Head = new SnakeBody { X = 16, Y = 6 };
-            Tail = new List<SnakeBody>();
+            StartY = 6;
+            Head = new Body(16, 6, SNAKE_BODY);
+            Tail = new List<Body>();
 
             InitBody(lenght);
             
-            MovingThread = new Thread(Moving);
-            ControlingThread = new Thread(Controling);
+            MovingThread = new Thread(Move);
+            ControlingThread = new Thread(Control);
             Console.CursorVisible = false;
 
             void InitBody(int lenght)
@@ -70,9 +73,9 @@ namespace Snake
                 {
                     throw new ArgumentException("Snake lenght can't be zero!");
                 }
-                for (var i = lenght - 1; i > 0; i--)
+                for (var i = 0; i < lenght - 1; i++)
                 {
-                    Tail.Add(new SnakeBody { X = i, Y = StartY });
+                    Tail.Add(new Body(15 - i, StartY, SNAKE_BODY));
                 }
             }
         }
@@ -80,33 +83,18 @@ namespace Snake
         #region Public Methods
         public Snake Build()
         {
-
             DisplayInit();
             return this;
         }
-        private Apple Apple;
         public void Start(Apple apple)
         {
-            //Console.ForegroundColor = ConsoleColor.Red;
-            //InitialDispaly();
             Apple = apple;
             ControlingThread.Start();
             MovingThread.Start();
         }
-        private bool StopVal = false;
         public void Stop()
         {
-            StopVal = true;
-        }
-        public void AddBody()
-        {
-            var body = new SnakeBody { };
-            Tail.Add(body);
-        }
-        public void EatBody(int position)
-        {
-
-            throw new NotImplementedException();
+            IsStop = true;
         }
         #endregion
         #region Events
@@ -120,40 +108,43 @@ namespace Snake
             }
             AppleAchieved?.Invoke(this);
             var last = Tail[Tail.Count() - 1];
-            Tail.Add(new SnakeBody { X = last.X, Y = last.Y });
+            Tail.Add(new Body(last.X, last.Y, SNAKE_BODY));
         }
         #endregion
         #region Private Methods
-        private void Controling()
+        private void Control()
         {
-            while (!StopVal)
+            while (!IsStop)
             {
-                var key = Console.ReadKey(true).Key;
-                if (IsMoving)
+                if (Console.KeyAvailable)
                 {
-                    if (key == ConsoleKey.LeftArrow && Direction != 3)
+                    var key = Console.ReadKey(true).Key;
+                    if (IsMoving)
                     {
-                        Direction = 1;
-                    }
-                    else if (key == ConsoleKey.UpArrow && Direction != 4)
-                    {
-                        Direction = 2;
-                    }
-                    else if (key == ConsoleKey.RightArrow && Direction != 1)
-                    {
-                        Direction = 3;
-                    }
-                    else if (key == ConsoleKey.DownArrow && Direction != 2)
-                    {
-                        Direction = 4;
+                        if (key == ConsoleKey.LeftArrow && Direction != Directions.RIGHT)
+                        {
+                            Direction = Directions.LEFT;
+                        }
+                        else if (key == ConsoleKey.UpArrow && Direction != Directions.DOWN)
+                        {
+                            Direction = Directions.UP;
+                        }
+                        else if (key == ConsoleKey.RightArrow && Direction != Directions.LEFT)
+                        {
+                            Direction = Directions.RIGHT;
+                        }
+                        else if (key == ConsoleKey.DownArrow && Direction != Directions.UP)
+                        {
+                            Direction = Directions.DOWN;
+                        }
                     }
                 }
             }
             return;
         }
-        private void Moving()
+        private void Move()
         {
-            while (!StopVal)
+            while (!IsStop)
             {
                 if (IsMoving)
                 {
@@ -165,14 +156,10 @@ namespace Snake
                         MoveNext(x, y);
                         //DisplayFill();
                     }
-                    else
+                    else if (Tail.Any(body => body.X == x && body.Y == y))
                     {
-                        MoveNext(x, y);
-                    }
-                    if (Tail.Any(body => body.X == x && body.Y == y))
-                    {
-                        CutOn(x, y);
-                        MoveNext(x, y);
+                        IsError = true;
+                        return;
                     }
                     else
                     {
@@ -184,7 +171,7 @@ namespace Snake
             return;
             int getX()
             {
-                var x = Head.X + (Direction == 1 ? -1 : Direction == 3 ? 1 : 0);
+                var x = Head.X + (Direction == Directions.LEFT ? -1 : Direction == Directions.RIGHT ? 1 : 0);
                 if (x < Area.StartX)
                 {
                     return Area.EndX;
@@ -197,7 +184,7 @@ namespace Snake
             }
             int getY()
             {
-                var y = Head.Y + (Direction == 2 ? -1 : Direction == 4 ? 1 : 0);
+                var y = Head.Y + (Direction == Directions.UP ? -1 : Direction == Directions.DOWN ? 1 : 0);
                 if (y < Area.StartY)
                 {
                     return Area.EndY;
@@ -212,45 +199,31 @@ namespace Snake
         private void MoveNext(int x, int y)
         {
             Tail.Insert(0, Head);
+            Tail[0].Display(DEFAULT_COLOR);
+
             Head = Tail[Tail.Count - 1];
-            DisplayNext(x, y, Head.X, Head.Y);
-
-            Head.X = x;
-            Head.Y = y;
-
             Tail.RemoveAt(Tail.Count - 1);
+
+            Head.Clear();
+            Head.SetPosition(x, y);
+            Head.Display(HEAD_COLOR);
         }
         private void DisplayInit()
         {
-            Console.ForegroundColor = HEAD_COLOR;
-            Console.SetCursorPosition(Head.X, Head.Y);
-            Console.Write(SNAKE_BODY);
-            Console.ForegroundColor = DEFAULT_COLOR;
-
-            foreach (var body in Tail)
-            {
-                Console.SetCursorPosition(body.X, body.Y);
-                Console.Write(SNAKE_BODY);
-            }
+            Head.Display(HEAD_COLOR);
+            Tail.ForEach(body => body.Display(DEFAULT_COLOR));
         }
-        private void DisplayNext(int headX, int headY, int tailX, int tailY)
+        private void DisplayFail()
         {
-            Console.ForegroundColor = HEAD_COLOR;
-            Console.SetCursorPosition(headX, headY);
-            Console.Write(SNAKE_BODY);
-            Console.ForegroundColor = DEFAULT_COLOR;
 
-            Console.SetCursorPosition(Tail[0].X, Tail[0].Y);
-            Console.Write(SNAKE_BODY);
-            Console.SetCursorPosition(tailX, tailY);
-            Console.Write(' ');
         }
+
         private void DisplayFill()
         {
             var delay = 25;
             IsMoving = false;
             var first = true;
-            SnakeBody prev = new SnakeBody();
+            var prev = new Body(0, 0, SNAKE_BODY);
             foreach (var body in Tail)
             {
                 if (!first)
@@ -274,37 +247,56 @@ namespace Snake
             Console.Write(SNAKE_BODY);
             IsMoving = true;
         }
-        private void CutOn(int x, int y)
-        {
-            var body = Tail.Single(b => b.X == x && b.Y == y);
-            var i = 0;
-            var bodyes = new List<SnakeBody>();
-            var match = false;
-            var index = 0;
-            for (i = 0; i < Tail.Count(); i++)
-            {
-                if (Tail[i].X == x && Tail[i].Y == y)
-                {
-                    match = true;
-                    index = i;
-                }
-                if (match)
-                {
-                    bodyes.Add(Tail[i]);
-                }
-            }
-            foreach (var b in bodyes)
-            {
-                Console.SetCursorPosition(b.X, b.Y);
-                Console.Write(' ');
-            }
-            Tail.RemoveRange(i, Tail.Count() - i - 1);
-        }
         #endregion        
     }
     public class SnakeBody
     {
         public int X { get; set; }
         public int Y { get; set; }
+    }
+
+    class Body : Point
+    {
+        #region Constants
+
+        #endregion
+        public Body(int x, int y, char symbol) : base(x, y, symbol)
+        {
+
+        }
+
+        #region Public Methods
+        public void Move(Directions direction, int step = 1)
+        {
+            switch (direction)
+            {
+                case Directions.RIGHT:
+                    X += step;
+                    break;
+                case Directions.LEFT:
+                    X -= step;
+                    break;
+                case Directions.UP:
+                    Y -= step;
+                    break;
+                case Directions.DOWN:
+                    Y += step;
+                    break;
+            }
+        }
+        public void Display(ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            base.Draw();
+        }
+        #endregion
+    }
+
+    enum Directions
+    {
+        LEFT = 0,
+        UP = 1,
+        RIGHT = 2,
+        DOWN = 3
     }
 }
