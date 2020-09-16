@@ -1,5 +1,4 @@
 ﻿using System;
-using Snake.Windows;
 
 namespace Snake
 {

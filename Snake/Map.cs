@@ -5,7 +5,6 @@ namespace Snake
 {
     public class Map
     {
-        #region Constants
         private const char HorizontalWall = '-';
         private const char VerticalWall = '|';
         private const ConsoleColor WallColor = ConsoleColor.DarkGray;
@@ -14,12 +13,11 @@ namespace Snake
         private const string NicknameTitle = "NICKNAME:";
         private const int MaxScore = 100000;
         private const ConsoleColor INFO_COLOR = ConsoleColor.Green;
-        #endregion
-        #region Public Properties
+
         public int Width { get; private set; }
         public int Height { get; private set; }
-        #endregion
-        #region Properties
+        public IArea Area => area.Value;
+
         private readonly int MapX;
         private readonly int MapY;
 
@@ -33,12 +31,10 @@ namespace Snake
         private readonly string Nickname;
         private readonly int NicknameX;
         private readonly int NicknameY;
-        #endregion
-        #region Area Propertirs
+        private int Len = Snake.DEFAULT_LENGHT;
+
         private readonly Lazy<IArea> area;
-        public IArea Area => area.Value;
-        #endregion
-        #region Constructors
+
         public Map(int x, int y, int width, int height, string nickname)
         {
             MapX = x;
@@ -58,8 +54,7 @@ namespace Snake
 
             area = new Lazy<IArea>(new Area(MapX + 1, MapY + 5, Width - 2, Height - 2));
         }
-        #endregion
-        #region Public Methods
+
         public Map Build()
         {
             CreateWalls();
@@ -71,7 +66,6 @@ namespace Snake
             Score += points;
             SetScore(Score);
         }
-        public int Len = Snake.DEFAULT_LENGHT;
         public void AddLenght(int lenght)
         {
             Len += lenght;
@@ -83,8 +77,7 @@ namespace Snake
             Console.ForegroundColor = INFO_COLOR;
             Console.Write(lenght + new string(' ', 3));
         }
-        #endregion
-        #region Private Methods
+
         private void CreateWalls()
         {
             Console.ForegroundColor = WallColor;
@@ -137,6 +130,5 @@ namespace Snake
             Console.ForegroundColor = INFO_COLOR;
             Console.Write(score + new string(' ', MaxScore.ToString().Length - score.ToString().Length));
         }
-        #endregion
     }
 }

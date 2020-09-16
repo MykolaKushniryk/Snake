@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace Snake.Windows
 {
     public abstract class BaseWindow : IDisposable
     {
-        #region Constants
         private const char HORIZONTAL_BORDER = '-';
         private const char VERTICAL_BORDER = '|';
         private const ConsoleColor BORDER_COLOR = ConsoleColor.DarkGray;
@@ -17,8 +14,7 @@ namespace Snake.Windows
         private const ConsoleColor EXIT_BUTTON_COLOR = ConsoleColor.Red;
         protected const int MIN_WINDOW_HEIGHT = 7;
         protected static int MIN_WINDOW_WIDTH => TRYAGAIN_BUTTON.Length + EXIT_BUTTON.Length + 6;
-        #endregion
-        #region Properties
+
         private string TRYAGAIN_BUTTON_ACTIVE = new string('-', TRYAGAIN_BUTTON.Length);
         private string EXIT_BUTTON_ACTIVE = new string('-', EXIT_BUTTON.Length);
         
@@ -30,8 +26,7 @@ namespace Snake.Windows
         protected int Width;
 
         private bool IsExit = false;
-        #endregion
-        #region Constructors
+
         public BaseWindow(int x, int y, int width)
         {
             X = x;
@@ -39,10 +34,7 @@ namespace Snake.Windows
             Width = width;
             ControlThread = new Thread(ListenControls);
         }
-        #endregion
-        #region Public Methods
-        #endregion
-        #region Methods
+
         protected void Build(string message)
         {
             if (MIN_WINDOW_WIDTH > Width)
@@ -77,8 +69,7 @@ namespace Snake.Windows
             ControlThread.Start();
         }
         protected abstract void OnSelected(bool isExite);
-        #endregion
-        #region Private Methods
+
         private void ListenControls()
         {
             while (Controling)
@@ -124,14 +115,12 @@ namespace Snake.Windows
                 Console.Write(empty);
             }
         }
-        #endregion
-        #region Static Methods
+
         protected static int GetWidth(string message)
         {
             return MIN_WINDOW_WIDTH < message.Length + 4 ? message.Length + 4 : MIN_WINDOW_WIDTH;
         }
-        #endregion
-        #region Dispose
+
         private bool disposed = false;
         protected virtual void Dispose(bool disposing)
         {
@@ -148,6 +137,5 @@ namespace Snake.Windows
         {
             Dispose(true);
         }
-        #endregion
     }
 }

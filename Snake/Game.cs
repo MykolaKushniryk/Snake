@@ -1,6 +1,6 @@
-﻿using Snake.Interfaces;
+﻿using System;
 using Snake.Windows;
-using System;
+using Snake.Interfaces;
 
 namespace Snake
 {
@@ -44,12 +44,12 @@ namespace Snake
             }
             Console.Clear();
             Console.WriteLine("Goodbye!");
-            
+
         }
         public bool Play()
         {
             Map = new Map(0, 0, 80, 20, "mkushniryk").Build();
-            
+
             Snake = new Snake(Map.Area);
             Apple = new Apple(Map.Area, Snake);
             try
@@ -73,7 +73,7 @@ namespace Snake
                 Snake.Stop();
             }
         }
-        
+
         private void Refresh(IAreaObject areaObject)
         {
             Map.AddScore(1);

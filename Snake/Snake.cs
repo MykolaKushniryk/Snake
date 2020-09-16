@@ -62,7 +62,7 @@ namespace Snake
             Tail = new List<Body>();
 
             InitBody(lenght);
-            
+
             MovingThread = new Thread(Move);
             ControlingThread = new Thread(Control);
             Console.CursorVisible = false;
@@ -247,7 +247,7 @@ namespace Snake
             Console.Write(SNAKE_BODY);
             IsMoving = true;
         }
-        #endregion        
+        #endregion 
     }
     public class SnakeBody
     {
